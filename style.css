@@ -1,41 +1,93 @@
-.country-flag {
-    width: 24px;
-    height: 16px;
-    margin-right: 8px;
-    vertical-align: middle;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #F9FAFB;
+    color: #1F2937;
+    margin: 0;
+    padding: 0;
 }
 
-.card {
-    margin-bottom: 20px;
-    height: 100%;
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 2rem;
 }
 
-.metric-card {
-    text-align: center;
-    padding: 15px;
+h1, h2 {
+    color: #1F2937;
+    font-weight: 700;
+    margin-bottom: 1rem;
 }
 
-.metric-value {
-    font-size: 24px;
-    font-weight: bold;
+h1 {
+    font-size: 2.5rem;
 }
 
-.metric-label {
-    font-size: 14px;
-    color: #6c757d;
+h2 {
+    font-size: 1.75rem;
 }
 
-#world-map {
-    height: 400px;
+button, .btn {
+    background-color: #6C63FF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #5848e5;
+}
+
+.language-switcher {
+    margin-bottom: 2rem;
+    text-align: right;
+}
+
+.language-switcher select {
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+.metrics-table {
     width: 100%;
-    background-color: #f8f9fa;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 0 12px rgba(0,0,0,0.05);
 }
 
-.table-responsive {
-    max-height: 600px;
-    overflow-y: auto;
+.metrics-table th, .metrics-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #E5E7EB;
+    text-align: left;
 }
 
-.progress {
-    height: 20px;
+.metrics-table th {
+    background-color: #F3F4F6;
+    font-weight: 600;
+    color: #374151;
+}
+
+.metrics-table tr:hover {
+    background-color: #F9FAFB;
+}
+
+.chart-container {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.chart-container img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
