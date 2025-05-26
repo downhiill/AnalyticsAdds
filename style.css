@@ -1,0 +1,41 @@
+.country-flag {
+    width: 24px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.card {
+    margin-bottom: 20px;
+    height: 100%;
+}
+
+.metric-card {
+    text-align: center;
+    padding: 15px;
+}
+
+.metric-value {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+#world-map {
+    height: 400px;
+    width: 100%;
+    background-color: #f8f9fa;
+}
+
+.table-responsive {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.progress {
+    height: 20px;
+}
