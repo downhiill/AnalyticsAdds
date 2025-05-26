@@ -38,7 +38,7 @@ async function fetchData() {
         // 5. Показываем индикатор загрузки
         $('#loading-indicator').show();
         
-        const response = await fetch(`https://localhost:7001/api/Analytics/countries/metadata?startDate=${startDate}&endDate=${endDate}&language=${language}`);
+        const response = await fetch(`https://addsapi.onrender.com/api/Analytics/countries/metadata?startDate=${startDate}&endDate=${endDate}&language=${language}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
