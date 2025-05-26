@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countries Analytics Dashboard</title>
+    <title>Аналитика по странам</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Chart.js -->
@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="container-fluid py-4">
-        <h1 class="mb-4">Countries Analytics Dashboard</h1>
+        <h1 class="mb-4">Анализ рекламной кампании</h1>
         
         <!-- Filters -->
         <div class="card mb-4">
@@ -22,16 +22,16 @@
                 <form id="filters-form">
                     <div class="row">
                         <div class="col-md-3">
-                            <label for="start-date" class="form-label">Start Date</label>
+                            <label for="start-date" class="form-label">Дата начала</label>
                             <input type="date" class="form-control" id="start-date">
                         </div>
                         <div class="col-md-3">
-                            <label for="end-date" class="form-label">End Date</label>
+                            <label for="end-date" class="form-label">Дата окончания</label>
                             <input type="date" class="form-control" id="end-date">
                         </div>
                         
                         <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                            <button type="submit" class="btn btn-primary w-100">Применить</button>
                         </div>
                     </div>
                 </form>
@@ -43,25 +43,25 @@
             <div class="col-md-3">
                 <div class="card metric-card">
                     <div class="metric-value" id="total-visits">0</div>
-                    <div class="metric-label">Total Visits</div>
+                    <div class="metric-label">Всего визитов</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card metric-card">
                     <div class="metric-value" id="total-visitors">0</div>
-                    <div class="metric-label">Unique Visitors</div>
+                    <div class="metric-label">Уникальные посетители</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card metric-card">
                     <div class="metric-value" id="total-conversions">0</div>
-                    <div class="metric-label">Total Conversions</div>
+                    <div class="metric-label">Конверсии</div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card metric-card">
                     <div class="metric-value" id="total-revenue">$0</div>
-                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-label">Доход</div>
                 </div>
             </div>
         </div>
@@ -71,7 +71,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Visits by Country</h5>
+                        <h5 class="card-title">Визиты по странам</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="visits-chart"></canvas>
@@ -81,7 +81,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Revenue by Country</h5>
+                        <h5 class="card-title">Доход по странам</h5>
                     </div>
                     <div class="card-body">
                         <canvas id="revenue-chart"></canvas>
@@ -101,9 +101,9 @@
         <!-- Data Table -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Countries Data</h5>
+                <h5 class="card-title mb-0">Данные по странам</h5>
                 <div>
-                    <button id="export-csv" class="btn btn-sm btn-outline-secondary">Export CSV</button>
+                    <button id="export-csv" class="btn btn-sm btn-outline-secondary">Экспорт в CSV</button>
                 </div>
             </div>
             <div class="card-body">
@@ -111,18 +111,18 @@
                     <table class="table table-hover" id="countries-table">
                         <thead>
                             <tr>
-                                <th>Country</th>
-                                <th>Visits</th>
-                                <th>Unique Visitors</th>
-                                <th>Actions</th>
-                                <th>Conversions</th>
-                                <th>Conversion Rate</th>
-                                <th>Revenue</th>
-                                <th>Avg. Visit Duration</th>
+                                <th>Страна</th>
+                                <th>Визиты</th>
+                                <th>Уникальные посетители</th>
+                                <th>Действия</th>
+                                <th>Конверсии</th>
+                                <th>Доход</th>
+                                <th>Сред. длительность визита</th>
+                                <th>Показатель отказов</th>
                             </tr>
                         </thead>
                         <tbody id="countries-data">
-                            <!-- Data will be inserted here -->
+                            <!-- Данные будут вставлены сюда -->
                         </tbody>
                     </table>
                 </div>
