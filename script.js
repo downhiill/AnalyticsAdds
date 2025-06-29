@@ -397,30 +397,58 @@ function initMap() {
         console.error('Map container not found');
         return;
     }
-
-    // Очищаем контейнер
     mapContainer.innerHTML = '';
 
-    // Проверяем наличие Datamap
     if (typeof Datamap === 'undefined') {
         console.error('Datamaps library not loaded');
         return;
     }
 
-    // Создаем данные для карты
+    // Alpha-2 to Alpha-3 mapping
+const alpha2to3 = {
+    AF: 'AFG', AX: 'ALA', AL: 'ALB', DZ: 'DZA', AS: 'ASM', AD: 'AND', AO: 'AGO', AI: 'AIA', AQ: 'ATA', AG: 'ATG',
+    AR: 'ARG', AM: 'ARM', AW: 'ABW', AU: 'AUS', AT: 'AUT', AZ: 'AZE', BS: 'BHS', BH: 'BHR', BD: 'BGD', BB: 'BRB',
+    BY: 'BLR', BE: 'BEL', BZ: 'BLZ', BJ: 'BEN', BM: 'BMU', BT: 'BTN', BO: 'BOL', BQ: 'BES', BA: 'BIH', BW: 'BWA',
+    BV: 'BVT', BR: 'BRA', IO: 'IOT', BN: 'BRN', BG: 'BGR', BF: 'BFA', BI: 'BDI', KH: 'KHM', CM: 'CMR', CA: 'CAN',
+    CV: 'CPV', KY: 'CYM', CF: 'CAF', TD: 'TCD', CL: 'CHL', CN: 'CHN', CX: 'CXR', CC: 'CCK', CO: 'COL', KM: 'COM',
+    CG: 'COG', CD: 'COD', CK: 'COK', CR: 'CRI', CI: 'CIV', HR: 'HRV', CU: 'CUB', CW: 'CUW', CY: 'CYP', CZ: 'CZE',
+    DK: 'DNK', DJ: 'DJI', DM: 'DMA', DO: 'DOM', EC: 'ECU', EG: 'EGY', SV: 'SLV', GQ: 'GNQ', ER: 'ERI', EE: 'EST',
+    SZ: 'SWZ', ET: 'ETH', FK: 'FLK', FO: 'FRO', FJ: 'FJI', FI: 'FIN', FR: 'FRA', GF: 'GUF', PF: 'PYF', TF: 'ATF',
+    GA: 'GAB', GM: 'GMB', GE: 'GEO', DE: 'DEU', GH: 'GHA', GI: 'GIB', GR: 'GRC', GL: 'GRL', GD: 'GRD', GP: 'GLP',
+    GU: 'GUM', GT: 'GTM', GG: 'GGY', GN: 'GIN', GW: 'GNB', GY: 'GUY', HT: 'HTI', HM: 'HMD', VA: 'VAT', HN: 'HND',
+    HK: 'HKG', HU: 'HUN', IS: 'ISL', IN: 'IND', ID: 'IDN', IR: 'IRN', IQ: 'IRQ', IE: 'IRL', IM: 'IMN', IL: 'ISR',
+    IT: 'ITA', JM: 'JAM', JP: 'JPN', JE: 'JEY', JO: 'JOR', KZ: 'KAZ', KE: 'KEN', KI: 'KIR', KP: 'PRK', KR: 'KOR',
+    KW: 'KWT', KG: 'KGZ', LA: 'LAO', LV: 'LVA', LB: 'LBN', LS: 'LSO', LR: 'LBR', LY: 'LBY', LI: 'LIE', LT: 'LTU',
+    LU: 'LUX', MO: 'MAC', MG: 'MDG', MW: 'MWI', MY: 'MYS', MV: 'MDV', ML: 'MLI', MT: 'MLT', MH: 'MHL', MQ: 'MTQ',
+    MR: 'MRT', MU: 'MUS', YT: 'MYT', MX: 'MEX', FM: 'FSM', MD: 'MDA', MC: 'MCO', MN: 'MNG', ME: 'MNE', MS: 'MSR',
+    MA: 'MAR', MZ: 'MOZ', MM: 'MMR', NA: 'NAM', NR: 'NRU', NP: 'NPL', NL: 'NLD', NC: 'NCL', NZ: 'NZL', NI: 'NIC',
+    NE: 'NER', NG: 'NGA', NU: 'NIU', NF: 'NFK', MK: 'MKD', MP: 'MNP', NO: 'NOR', OM: 'OMN', PK: 'PAK', PW: 'PLW',
+    PS: 'PSE', PA: 'PAN', PG: 'PNG', PY: 'PRY', PE: 'PER', PH: 'PHL', PN: 'PCN', PL: 'POL', PT: 'PRT', PR: 'PRI',
+    QA: 'QAT', RE: 'REU', RO: 'ROU', RU: 'RUS', RW: 'RWA', BL: 'BLM', SH: 'SHN', KN: 'KNA', LC: 'LCA', MF: 'MAF',
+    PM: 'SPM', VC: 'VCT', WS: 'WSM', SM: 'SMR', ST: 'STP', SA: 'SAU', SN: 'SEN', RS: 'SRB', SC: 'SYC', SL: 'SLE',
+    SG: 'SGP', SX: 'SXM', SK: 'SVK', SI: 'SVN', SB: 'SLB', SO: 'SOM', ZA: 'ZAF', GS: 'SGS', SS: 'SSD', ES: 'ESP',
+    LK: 'LKA', SD: 'SDN', SR: 'SUR', SJ: 'SJM', SE: 'SWE', CH: 'CHE', SY: 'SYR', TW: 'TWN', TJ: 'TJK', TZ: 'TZA',
+    TH: 'THA', TL: 'TLS', TG: 'TGO', TK: 'TKL', TO: 'TON', TT: 'TTO', TN: 'TUN', TR: 'TUR', TM: 'TKM', TC: 'TCA',
+    TV: 'TUV', UG: 'UGA', UA: 'UKR', AE: 'ARE', GB: 'GBR', US: 'USA', UM: 'UMI', UY: 'URY', UZ: 'UZB', VU: 'VUT',
+    VE: 'VEN', VN: 'VNM', VG: 'VGB', VI: 'VIR', WF: 'WLF', EH: 'ESH', YE: 'YEM', ZM: 'ZMB', ZW: 'ZWE'
+};
+
     const mapData = {};
     countriesData.forEach(country => {
-        if (country.code) {
-            mapData[country.code.toUpperCase()] = {
-                visits: country.nb_visits || 0,
-                revenue: country.revenue || 0,
-                fillKey: getFillKey(country.nb_visits || 0)
-            };
+        if (!country.code) return;
+        const code2 = country.code.toUpperCase();
+        const code3 = alpha2to3[code2] || code2;
+        if (!mapData[code3]) {
+            mapData[code3] = { visits: 0, revenue: 0, fillKey: 'NONE' };
         }
+        mapData[code3].visits += toNumber(country.nb_visits);
+        mapData[code3].revenue += toNumber(country.revenue);
+    });
+    Object.keys(mapData).forEach(code => {
+        mapData[code].fillKey = getFillKey(mapData[code].visits);
     });
 
     try {
-        // Инициализируем новую карту
         worldMap = new Datamap({
             element: mapContainer,
             scope: 'world',
@@ -437,25 +465,19 @@ function initMap() {
                 popupOnHover: true,
                 highlightOnHover: true,
                 popupTemplate: function(geo, data) {
-                    if (!data) return null;
+                    if (!data) return `<div class="hoverinfo"><strong>${geo.properties.name}</strong><br/>Нет данных</div>`;
                     return [
                         '<div class="hoverinfo">',
-                        '<strong>' + geo.properties.name + '</strong>',
-                        '<br/>Visits: ' + data.visits.toLocaleString(),
-                        '<br/>Revenue: $' + data.revenue.toFixed(2),
+                        `<strong>${geo.properties.name}</strong>`,
+                        `<br/>Визиты: ${data.visits.toLocaleString()}`,
+                        `<br/>Доход: $${data.revenue.toFixed(2)}`,
                         '</div>'
                     ].join('');
                 }
-            },
-            done: function(datamap) {
-                datamap.svg.selectAll('.datamaps-subunit').on('mouseover', function(geography) {
-                    // Добавляем обработчики событий
-                });
             }
         });
     } catch (e) {
         console.error('Error initializing map:', e);
-        // Fallback: показать простое сообщение
         mapContainer.innerHTML = '<div class="alert alert-warning">Could not load world map</div>';
     }
 }
