@@ -3,6 +3,7 @@ let countriesData = [];
 let visitsChart = null;
 let revenueChart = null;
 let worldMap = null;
+let countrySortOrder = 'asc';
 
 $(document).ready(function () {
     // 2. Инициализация дат
@@ -17,7 +18,20 @@ $(document).ready(function () {
         fetchData();
     });
 
+    $('#country-sort-header').on('click', function () {
+        countrySortOrder = countrySortOrder === 'asc' ? 'desc' : 'asc';
+        updateTable();
+        updateCountrySortIcon();
+    });
+
+    updateCountrySortIcon();
+
     $('#export-csv').on('click', exportToCSV);
+});
+
+$(document).on('click', '.country-row', function () {
+    const rowId = $(this).data('rowid');
+    $(`#${rowId}`).toggle();
 });
 
 function initDateFilters() {
@@ -98,55 +112,159 @@ function updateSummaryMetrics() {
     $('#total-revenue').text(`$${metrics.revenue.toFixed(2)}`);
 }
 
+function updateCountrySortIcon() {
+    const icon = countrySortOrder === 'asc' ? '▲' : '▼';
+    $('#country-sort-icon').text(icon);
+}
+
 function updateTable() {
     const $tableBody = $('#countries-data');
     if (!$tableBody.length) return;
-    
+
     $tableBody.empty();
-    
-    // 11. Сортируем и выводим данные
-    countriesData
-        .sort((a, b) => (b.nb_visits || 0) - (a.nb_visits || 0))
-        .forEach(country => {
-            const row = createTableRow(country);
-            $tableBody.append(row);
-        });
+
+    // 1. Группируем данные по стране
+    const countryGroups = {};
+    countriesData.forEach(item => {
+        const code = item.code;
+        if (!countryGroups[code]) countryGroups[code] = [];
+        countryGroups[code].push(item);
+    });
+
+    // 2. Формируем агрегированные строки
+    let rows = Object.values(countryGroups)
+        .map(group => aggregateCountryData(group));
+
+    // 3. Сортировка по названию страны
+    rows.sort((a, b) => {
+        const labelA = (a.label || '').toLowerCase();
+        const labelB = (b.label || '').toLowerCase();
+        if (labelA < labelB) return countrySortOrder === 'asc' ? -1 : 1;
+        if (labelA > labelB) return countrySortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    // 4. Выводим строки
+    rows.forEach(aggCountry => {
+        const row = createTableRow(aggCountry, countryGroups[aggCountry.code]);
+        $tableBody.append(row);
+    });
 }
 
-function createTableRow(country) {
-    // 12. Рассчитываем метрики для строки
-    const visits = country.nb_visits || 0;
-    const duration = visits ? (country.sum_visit_length || 0) / visits : 0;
-    const bounceRate = visits ? ((country.bounce_count || 0) / visits) * 100 : 0;
-    const conversionRate = visits ? ((country.nb_visits_converted || 0) / visits) * 100 : 0;
-    
-    return `
-        <tr>
-            <td><span class="flag-icon flag-icon-${country.code.toLowerCase()}"></span> ${country.label}</td>
+
+// Агрегируем данные по стране
+function aggregateCountryData(group) {
+    const first = group[0];
+    const sum = (key) => group.reduce((acc, c) => acc + toNumber(c[key]), 0);
+    return {
+        code: first.code,
+        label: first.label,
+        nb_visits: sum('nb_visits'),
+        nb_uniq_visitors: sum('nb_uniq_visitors'),
+        nb_actions: sum('nb_actions'),
+        nb_conversions: sum('nb_conversions'),
+        nb_visits_converted: sum('nb_visits_converted'),
+        sum_visit_length: sum('sum_visit_length'),
+        bounce_count: sum('bounce_count'),
+        revenue: sum('revenue')
+    };
+}
+
+function toNumber(val) {
+    // Преобразует к числу, если не число — возвращает 0
+    const n = Number(val);
+    return isFinite(n) ? n : 0;
+}
+
+function createTableRow(country, group) {
+    const visits = toNumber(country.nb_visits);
+    const uniq = toNumber(country.nb_uniq_visitors);
+    const actions = toNumber(country.nb_actions);
+    const conversions = toNumber(country.nb_conversions);
+    const visitsConverted = toNumber(country.nb_visits_converted);
+    const sumVisitLength = toNumber(country.sum_visit_length);
+    const bounceCount = toNumber(country.bounce_count);
+    const revenue = toNumber(country.revenue);
+
+    const duration = visits > 0 ? sumVisitLength / visits : 0;
+    const bounceRate = visits > 0 ? (bounceCount / visits) * 100 : 0;
+    const conversionRate = visits > 0 ? (visitsConverted / visits) * 100 : 0;
+
+    const rowId = `details-${country.code}`;
+
+    let html = `
+        <tr class="country-row" data-rowid="${rowId}" style="cursor:pointer;">
+            <td><span class="flag-icon flag-icon-${country.code ? country.code.toLowerCase() : ''}"></span> ${country.label || '-'}</td>
             <td>${visits.toLocaleString()}</td>
-            <td>${(country.nb_uniq_visitors || 0).toLocaleString()}</td>
-            <td>${(country.nb_actions || 0).toLocaleString()}</td>
+            <td>${uniq.toLocaleString()}</td>
+            <td>${actions.toLocaleString()}</td>
             <td>
                 <div class="d-flex align-items-center">
                     <div class="progress flex-grow-1" style="height: 20px;">
-                        <div class="progress-bar bg-success" style="width: ${conversionRate}%"></div>
+                        <div class="progress-bar bg-success" style="width: ${Math.min(conversionRate, 100)}%"></div>
                     </div>
-                    <span class="ms-2">${conversionRate.toFixed(1)}%</span>
+                    <span class="ms-2">${isFinite(conversionRate) ? conversionRate.toFixed(1) : '0.0'}%</span>
                 </div>
             </td>
-            <td>$${(country.revenue || 0).toFixed(2)}</td>
+            <td>$${revenue.toFixed(2)}</td>
             <td>${formatDuration(duration)}</td>
             <td>
                 <div class="d-flex align-items-center">
                     <div class="progress flex-grow-1" style="height: 20px;">
-                        <div class="progress-bar bg-danger" style="width: ${bounceRate}%"></div>
+                        <div class="progress-bar bg-danger" style="width: ${Math.min(bounceRate, 100)}%"></div>
                     </div>
-                    <span class="ms-2">${bounceRate.toFixed(1)}%</span>
+                    <span class="ms-2">${isFinite(bounceRate) ? bounceRate.toFixed(1) : '0.0'}%</span>
                 </div>
             </td>
         </tr>
     `;
+
+    // Детализация по дням (если есть больше одной записи)
+    if (group && group.length > 1) {
+        html += `
+        <tr class="details-row" id="${rowId}" style="display:none;">
+            <td colspan="9">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Визиты</th>
+                            <th>Уникальные посетители</th>
+                            <th>Действия</th>
+                            <th>Конверсии</th>
+                            <th>Доход</th>
+                            <th>Длительность</th>
+                            <th>Отказы</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${group.map(item => {
+                            const v = toNumber(item.nb_visits);
+                            const dur = v > 0 ? toNumber(item.sum_visit_length) / v : 0;
+                            const br = v > 0 ? (toNumber(item.bounce_count) / v) * 100 : 0;
+                            return `
+                            <tr>
+                                <td>${item.date || '-'}</td>
+                                <td>${v.toLocaleString()}</td>
+                                <td>${toNumber(item.nb_uniq_visitors).toLocaleString()}</td>
+                                <td>${toNumber(item.nb_actions).toLocaleString()}</td>
+                                <td>${toNumber(item.nb_conversions).toLocaleString()}</td>
+                                <td>$${toNumber(item.revenue).toFixed(2)}</td>
+                                <td>${formatDuration(dur)}</td>
+                                <td>${isFinite(br) ? br.toFixed(1) : '0.0'}%</td>
+                            </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        `;
+    }
+
+    return html;
 }
+
 
 function initCharts() {
     // 13. Проверяем наличие canvas-элементов
@@ -168,10 +286,28 @@ function initCharts() {
 }
 
 function createVisitsChart(canvas) {
-    const topCountries = [...countriesData]
+    // Агрегация данных по странам
+    const countryAggregates = {};
+    countriesData.forEach(country => {
+        const countryCode = country.code.toUpperCase();
+        if (!countryAggregates[countryCode]) {
+            countryAggregates[countryCode] = {
+                label: country.label,
+                nb_visits: 0,
+                nb_uniq_visitors: 0,
+                revenue: 0 // Добавляем доход для агрегации
+            };
+        }
+        countryAggregates[countryCode].nb_visits += country.nb_visits || 0;
+        countryAggregates[countryCode].nb_uniq_visitors += country.nb_uniq_visitors || 0;
+        countryAggregates[countryCode].revenue += country.revenue || 0;
+    });
+
+    // Преобразуем объект в массив и сортируем по визитам
+    const topCountries = Object.values(countryAggregates)
         .sort((a, b) => (b.nb_visits || 0) - (a.nb_visits || 0))
         .slice(0, 10);
-    
+
     return new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: {
@@ -194,10 +330,24 @@ function createVisitsChart(canvas) {
 }
 
 function createRevenueChart(canvas) {
-    const topCountries = [...countriesData]
+    // Агрегация данных по странам
+    const countryAggregates = {};
+    countriesData.forEach(country => {
+        const countryCode = country.code.toUpperCase();
+        if (!countryAggregates[countryCode]) {
+            countryAggregates[countryCode] = {
+                label: country.label,
+                revenue: 0
+            };
+        }
+        countryAggregates[countryCode].revenue += country.revenue || 0;
+    });
+
+    // Преобразуем объект в массив и сортируем по доходу
+    const topCountries = Object.values(countryAggregates)
         .sort((a, b) => (b.revenue || 0) - (a.revenue || 0))
         .slice(0, 10);
-    
+
     return new Chart(canvas.getContext('2d'), {
         type: 'bar',
         data: {
