@@ -3,7 +3,8 @@ let countriesData = [];
 let visitsChart = null;
 let revenueChart = null;
 let worldMap = null;
-let countrySortOrder = 'asc';
+let sortColumn = 'country'; // 'country', 'visits', 'revenue'
+let sortOrder = 'asc'; // 'asc' или 'desc'
 
 $(document).ready(function () {
     // 2. Инициализация дат
@@ -19,7 +20,20 @@ $(document).ready(function () {
     });
 
     $('#country-sort-header').on('click', function () {
-        countrySortOrder = countrySortOrder === 'asc' ? 'desc' : 'asc';
+        if (sortColumn === 'country') sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+        else { sortColumn = 'country'; sortOrder = 'asc'; }
+        updateTable();
+        updateCountrySortIcon();
+    });
+    $('#visits-sort-header').on('click', function () {
+        if (sortColumn === 'visits') sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+        else { sortColumn = 'visits'; sortOrder = 'asc'; }
+        updateTable();
+        updateCountrySortIcon();
+    });
+    $('#revenue-sort-header').on('click', function () {
+        if (sortColumn === 'revenue') sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+        else { sortColumn = 'revenue'; sortOrder = 'asc'; }
         updateTable();
         updateCountrySortIcon();
     });
@@ -113,8 +127,9 @@ function updateSummaryMetrics() {
 }
 
 function updateCountrySortIcon() {
-    const icon = countrySortOrder === 'asc' ? '▲' : '▼';
-    $('#country-sort-icon').text(icon);
+     $('#country-sort-icon').text(sortColumn === 'country' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕');
+    $('#visits-sort-icon').text(sortColumn === 'visits' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕');
+    $('#revenue-sort-icon').text(sortColumn === 'revenue' ? (sortOrder === 'asc' ? '▲' : '▼') : '↕');
 }
 
 function updateTable() {
@@ -137,10 +152,23 @@ function updateTable() {
 
     // 3. Сортировка по названию страны
     rows.sort((a, b) => {
-        const labelA = (a.label || '').toLowerCase();
-        const labelB = (b.label || '').toLowerCase();
-        if (labelA < labelB) return countrySortOrder === 'asc' ? -1 : 1;
-        if (labelA > labelB) return countrySortOrder === 'asc' ? 1 : -1;
+        let valA, valB;
+        if (sortColumn === 'country') {
+            valA = (a.label || '').toLowerCase();
+            valB = (b.label || '').toLowerCase();
+            return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        if (sortColumn === 'visits') {
+            valA = a.nb_visits;
+            valB = b.nb_visits;
+            return sortOrder === 'asc' ? valA - valB : valB - valA;
+        }
+        if (sortColumn === 'revenue') {
+            valA = a.revenue;
+            valB = b.revenue;
+            return sortOrder === 'asc' ? valA - valB : valB - valA;
+        }
+        // fallback
         return 0;
     });
 
@@ -227,7 +255,6 @@ function createTableRow(country, group) {
                 <table class="table table-sm table-bordered mb-0">
                     <thead>
                         <tr>
-                            <th>Дата</th>
                             <th>Визиты</th>
                             <th>Уникальные посетители</th>
                             <th>Действия</th>
@@ -244,7 +271,6 @@ function createTableRow(country, group) {
                             const br = v > 0 ? (toNumber(item.bounce_count) / v) * 100 : 0;
                             return `
                             <tr>
-                                <td>${item.date || '-'}</td>
                                 <td>${v.toLocaleString()}</td>
                                 <td>${toNumber(item.nb_uniq_visitors).toLocaleString()}</td>
                                 <td>${toNumber(item.nb_actions).toLocaleString()}</td>
